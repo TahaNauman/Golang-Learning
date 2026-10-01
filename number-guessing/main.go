@@ -37,7 +37,7 @@ func main() {
 	secretNumber = rand.Intn(upperLimit) + 1
 
 	for {
-		
+
 		var guess int
 		var playAgain string
 
@@ -57,7 +57,7 @@ func main() {
 				break
 			}
 		}
-		
+
 		fmt.Print("Enter your guess: ")
 		fmt.Scan(&guess)
 		if guess < 1 || guess > upperLimit {
@@ -88,4 +88,3 @@ func main() {
 		}
 	}
 }
-
