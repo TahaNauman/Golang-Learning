@@ -59,28 +59,58 @@ func findLowestGrade(grades []float64) (lowest float64, index int) {
 	return lowest, index
 }
 
+func findGradeRange(highest, lowest float64) float64 {
+	return highest - lowest
+}
+
+func findGradeLetter(grade float64) (letter string) {
+	switch {
+	case grade >= 90:
+		letter = "A"
+	case grade >= 80:
+		letter = "B"
+	case grade >= 70:
+		letter = "C"
+	case grade >= 60:
+		letter = "D"
+	default:
+		letter = "F"
+	}
+
+	return letter
+}
+
 func printStudentInfo(student Student) {
 	fmt.Printf("Student: %s\n", student.Name)
 	fmt.Println("Grades:")
 	for _, grade := range student.Grades {
-		fmt.Printf("  %.2f\n", grade)
+		letter := findGradeLetter(grade)
+		fmt.Printf("  %.2f (%s)\n", grade, letter)
 	}
+
 	average := calculateAverage(student.Grades)
-	fmt.Printf("Average: %.2f\n", average)
+	overallLetter := findGradeLetter(average)
+	fmt.Printf("Overall Average: %.2f (%s)\n", average, overallLetter)
 	fmt.Println()
 
-	highest, index := findHighestGrade(student.Grades)
-	if index != -1 {
-		fmt.Printf("Highest Grade: %.2f (Index: %d)\n", highest, index)
+	highest, highestIndex := findHighestGrade(student.Grades)
+	if highestIndex != -1 {
+		fmt.Printf("Highest Grade: %.2f (Index: %d)\n", highest, highestIndex)
 	} else {
 		fmt.Println("No grades available.")
 	}
 
-	lowest, index := findLowestGrade(student.Grades)
-	if index != -1 {
-		fmt.Printf("Lowest Grade: %.2f (Index: %d)\n", lowest, index)
+	lowest, lowestIndex := findLowestGrade(student.Grades)
+	if lowestIndex != -1 {
+		fmt.Printf("Lowest Grade: %.2f (Index: %d)\n", lowest, lowestIndex)
 	} else {
 		fmt.Println("No grades available.")
+	}
+
+	if highestIndex != -1 && lowestIndex != -1 {
+		fmt.Printf("Grade Range: %.2f\n", findGradeRange(highest, lowest))
+	} else {
+		fmt.Println("No grades available to calculate range.")
 	}
 }
 
