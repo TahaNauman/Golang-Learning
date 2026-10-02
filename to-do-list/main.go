@@ -23,15 +23,22 @@ func main() {
 
 	for {
 
-		var choice int
 		fmt.Println("")
 		fmt.Println("=== To Do List ===")
 		fmt.Println("1. View Tasks")
 		fmt.Println("2. Add Task")
-		fmt.Println("3. Exit")
+		fmt.Println("3. Complete Task")
+		fmt.Println("4. Delete Task")
+		fmt.Println("5. Edit Task")
+		fmt.Println("6. Exit")
 		fmt.Print("Choose an option: ")
 		scanner.Scan()
-		choice, _ = strconv.Atoi(scanner.Text())
+		choice, err := strconv.Atoi(scanner.Text())
+
+		if err != nil {
+			fmt.Println("Invalid input. Please enter a number.")
+			continue
+		}
 
 		switch choice {
 		case 1:
@@ -47,6 +54,55 @@ func main() {
 			title = scanner.Text()
 			tasks = append(tasks, Task{Title: title, Completed: false})
 		case 3:
+			var taskNumber int
+			fmt.Print("Enter task number to complete: ")
+			scanner.Scan()
+			taskNumber, err = strconv.Atoi(scanner.Text())
+			if err != nil {
+				fmt.Println("Invalid input. Please enter a number.")
+				continue
+			}
+			if taskNumber > 0 && taskNumber <= len(tasks) {
+				tasks[taskNumber-1].Completed = true
+				fmt.Println("Task marked as completed.")
+			} else {
+				fmt.Println("Invalid task number.")
+			}
+		case 4:
+			var taskNumber int
+			fmt.Print("Enter task number to delete: ")
+			scanner.Scan()
+			taskNumber, err = strconv.Atoi(scanner.Text())
+			if err != nil {
+				fmt.Println("Invalid input. Please enter a number.")
+				continue
+			}
+			if taskNumber > 0 && taskNumber <= len(tasks) {
+				tasks = append(tasks[:taskNumber-1], tasks[taskNumber:]...)
+				fmt.Println("Task deleted.")
+			} else {
+				fmt.Println("Invalid task number.")
+			}
+		case 5:
+			var taskNumber int
+			fmt.Print("Enter task number to edit: ")
+			scanner.Scan()
+			taskNumber, err = strconv.Atoi(scanner.Text())
+			if err != nil {
+				fmt.Println("Invalid input. Please enter a number.")
+				continue
+			}
+			if taskNumber > 0 && taskNumber <= len(tasks) {
+				var newTitle string
+				fmt.Print("Enter new task title: ")
+				scanner.Scan()
+				newTitle = scanner.Text()
+				tasks[taskNumber-1].Title = newTitle
+				fmt.Println("Task updated.")
+			} else {
+				fmt.Println("Invalid task number.")
+			}
+		case 6:
 			fmt.Println("Exiting...")
 			return
 		default:
