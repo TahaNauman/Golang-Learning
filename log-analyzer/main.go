@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 type LogEntry struct {
@@ -13,31 +14,32 @@ type LogEntry struct {
 	Message   string
 }
 
-func readLogFile(filename string) ([]LogEntry, error) {
+func readLogFile(filename string) ([]LogEntry,int, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer file.Close()
 
 	logEntries := []LogEntry{}
 	scanner := bufio.NewScanner(file)
+	malformedCount := 0
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		logEntry, err := parseLogLine(line)
 		if err != nil {
-			fmt.Println("Error parsing log line:", err)
+			malformedCount++
 			continue
 		}
 		logEntries = append(logEntries, logEntry)
 	}
 
 	if err := scanner.Err(); err != nil {
-		return logEntries, err
+		return logEntries, malformedCount, err
 	}
 
-	return logEntries, nil
+	return logEntries, malformedCount, nil
 }
 
 func parseLogLine(line string) (LogEntry, error) {
@@ -46,11 +48,23 @@ func parseLogLine(line string) (LogEntry, error) {
 		return LogEntry{}, fmt.Errorf("invalid log line: %s", line)
 	}
 
+	switch parts[2] {
+	case "INFO", "WARNING", "ERROR":
+		// Valid log levels
+	default:
+		return LogEntry{}, fmt.Errorf("invalid log level: %s", parts[2])
+	}
+
 	date := parts[0]
-	time := parts[1]
+	times := parts[1]
 	logLevel := parts[2]
-	timestamp := date + " " + time
+	timestamp := date + " " + times
 	message := strings.Join(parts[3:], " ")
+
+	_, err := time.Parse("2006-01-02 15:04:05", timestamp)
+	if err != nil {
+		return LogEntry{}, fmt.Errorf("invalid timestamp format: %s", timestamp)
+	}
 
 	return LogEntry{
 		Timestamp: timestamp,
@@ -81,7 +95,7 @@ func extractErrorMessages(entries []LogEntry) []string {
 	return errorMessages
 }
 
-func printReport(entries []LogEntry) {
+func printReport(entries []LogEntry, malformedCount int) {
 
 	logLevelCounts := make(map[string]int)
 	for _, entry := range entries {
@@ -96,12 +110,13 @@ func printReport(entries []LogEntry) {
 	mostFrequentLevel, maxCount := findMostFrequentLevel(logLevelCounts)
 	fmt.Printf("Most Frequent Log Level: %s (%d occurrences)\n", mostFrequentLevel, maxCount)
 
-	fmt.Printf("Toal Number of Entries are %d", len(entries))
+	fmt.Printf("Total Valid Entries: %d\n", len(entries))
+	fmt.Printf("Malformed Lines: %d\n", malformedCount)
 
 	errorMessages := extractErrorMessages(entries)
 	fmt.Println("\nError Messages:")
-	for _, msg := range errorMessages {
-		fmt.Println(msg)
+	for i, msg := range errorMessages {
+		fmt.Printf("%d: %s\n", i+1, msg)
 	}
 }
 
@@ -113,12 +128,12 @@ func main() {
 	}
 
 	logFile := os.Args[1]
-	logEntries, err := readLogFile(logFile)
+	logEntries, malformedCount, err := readLogFile(logFile)
 	if err != nil {
 		fmt.Println("Error reading log file:", err)
 		return
 	}
 
-	printReport(logEntries)
+	printReport(logEntries,malformedCount)
 
 }

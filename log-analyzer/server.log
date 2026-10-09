@@ -16,3 +16,7 @@
 2026-10-08 08:27:36 INFO User requested report
 2026-10-08 08:29:48 ERROR Failed to generate report
 2026-10-08 08:31:15 INFO Server continuing normally
+This line is invalid
+not-a-date not-a-time INFO Server started
+2026-13-08 08:01:12 INFO Invalid month
+2026-10-08 08:01:12 DEBUG Debug message
