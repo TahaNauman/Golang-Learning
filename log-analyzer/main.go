@@ -14,7 +14,7 @@ type LogEntry struct {
 	Message   string
 }
 
-func readLogFile(filename string) ([]LogEntry,int, error) {
+func readLogFile(filename string) ([]LogEntry, int, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, 0, err
@@ -134,6 +134,6 @@ func main() {
 		return
 	}
 
-	printReport(logEntries,malformedCount)
+	printReport(logEntries, malformedCount)
 
 }

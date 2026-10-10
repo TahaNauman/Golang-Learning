@@ -27,9 +27,9 @@ func TestParseLogLine(t *testing.T) {
 	if entry.Timestamp != "2026-10-08 08:23:45" || entry.LogLevel != "INFO" || entry.Message != "Server started" {
 		t.Errorf("Parsed log entry does not match expected values")
 	}
-	
+
 	invalidLine := "2026-10-08 08:23:45 INVALID Server started"
-	_, err = parseLogLine(invalidLine)	
+	_, err = parseLogLine(invalidLine)
 	if err == nil {
 		t.Errorf("Expected error for invalid log level, but got none")
 	}
@@ -44,7 +44,7 @@ func TestParseLogLine(t *testing.T) {
 	_, err = parseLogLine(invalidLine3)
 	if err == nil {
 		t.Errorf("Expected error for invalid timestamp format, but got none")
-	}	
+	}
 
 }
 
