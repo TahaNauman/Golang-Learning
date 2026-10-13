@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -54,6 +55,37 @@ func main() {
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
+	})
+
+	http.HandleFunc("PUT /tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(r.PathValue("id"))
+		if err != nil {
+			http.Error(w, "Invalid task ID", http.StatusBadRequest)
+			return
+		}
+
+		var updatedTask Task
+		if err := json.NewDecoder(r.Body).Decode(&updatedTask); err != nil {
+			http.Error(w, "Invalid request payload", http.StatusBadRequest)
+			return
+		}
+		if strings.TrimSpace(updatedTask.Title) == "" {
+			http.Error(w, "Task title is required", http.StatusBadRequest)
+			return
+		}
+
+		for i, task := range tasks {
+			if task.ID == id {
+				tasks[i].Completed = updatedTask.Completed
+				tasks[i].Title = updatedTask.Title
+				w.WriteHeader(http.StatusOK)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(tasks[i])
+				return
+			}
+		}
+
+		http.Error(w, "Task not found", http.StatusNotFound)
 	})
 
 	http.ListenAndServe(":8080", nil)
