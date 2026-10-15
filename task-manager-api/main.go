@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,9 +19,20 @@ var tasks = []Task{
 	{ID: 2, Title: "Task 2", Completed: true},
 }
 
-func main() {
+func maxID(tasks []Task) int {
+	maxId := 0
+	for _, task := range tasks {
+		if task.ID > maxId {
+			maxId = task.ID
+		}
+	}
+	return maxId
+}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+func setupRoutes() *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{"message": "Welcome to the Task Manager API!", "status": "running"})
@@ -29,7 +41,7 @@ func main() {
 		}
 	})
 
-	http.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(tasks)
@@ -45,19 +57,19 @@ func main() {
 				return
 			}
 
-			newTask.ID = len(tasks) + 1
+			newTask.ID = maxID(tasks) + 1
 			newTask.Completed = false
 
 			tasks = append(tasks, newTask)
-			w.WriteHeader(http.StatusCreated)
 			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(newTask)
 		} else {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	})
 
-	http.HandleFunc("PUT /tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("PUT /tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(r.PathValue("id"))
 		if err != nil {
 			http.Error(w, "Invalid task ID", http.StatusBadRequest)
@@ -78,8 +90,8 @@ func main() {
 			if task.ID == id {
 				tasks[i].Completed = updatedTask.Completed
 				tasks[i].Title = updatedTask.Title
-				w.WriteHeader(http.StatusOK)
 				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
 				json.NewEncoder(w).Encode(tasks[i])
 				return
 			}
@@ -88,5 +100,27 @@ func main() {
 		http.Error(w, "Task not found", http.StatusNotFound)
 	})
 
-	http.ListenAndServe(":8080", nil)
+	mux.HandleFunc("DELETE /tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(r.PathValue("id"))
+		if err != nil {
+			http.Error(w, "Invalid task ID", http.StatusBadRequest)
+			return
+		}
+
+		for i, task := range tasks {
+			if task.ID == id {
+				tasks = append(tasks[:i], tasks[i+1:]...)
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+		}
+
+		http.Error(w, "Task not found", http.StatusNotFound)
+	})
+
+	return mux
+}
+
+func main() {
+	log.Fatal(http.ListenAndServe(":8080", setupRoutes()))
 }
