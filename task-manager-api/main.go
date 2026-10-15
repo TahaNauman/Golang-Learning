@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Task struct {
@@ -18,6 +19,8 @@ var tasks = []Task{
 	{ID: 1, Title: "Task 1", Completed: false},
 	{ID: 2, Title: "Task 2", Completed: true},
 }
+
+var tasksMutex sync.Mutex
 
 func maxID(tasks []Task) int {
 	maxId := 0
@@ -44,6 +47,8 @@ func setupRoutes() *http.ServeMux {
 	mux.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			w.Header().Set("Content-Type", "application/json")
+			tasksMutex.Lock()
+			defer tasksMutex.Unlock()
 			json.NewEncoder(w).Encode(tasks)
 		} else if r.Method == http.MethodPost {
 			var newTask Task
@@ -57,6 +62,8 @@ func setupRoutes() *http.ServeMux {
 				return
 			}
 
+			tasksMutex.Lock()
+			defer tasksMutex.Unlock()
 			newTask.ID = maxID(tasks) + 1
 			newTask.Completed = false
 
@@ -86,6 +93,8 @@ func setupRoutes() *http.ServeMux {
 			return
 		}
 
+		tasksMutex.Lock()
+		defer tasksMutex.Unlock()
 		for i, task := range tasks {
 			if task.ID == id {
 				tasks[i].Completed = updatedTask.Completed
@@ -107,6 +116,8 @@ func setupRoutes() *http.ServeMux {
 			return
 		}
 
+		tasksMutex.Lock()
+		defer tasksMutex.Unlock()
 		for i, task := range tasks {
 			if task.ID == id {
 				tasks = append(tasks[:i], tasks[i+1:]...)
