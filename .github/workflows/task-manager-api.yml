@@ -1,0 +1,47 @@
+name: Task Manager API CI
+
+on:
+  push:
+    paths:
+      - "task-manager-api/**"
+      - ".github/workflows/task-manager-api.yml"
+  pull_request:
+    paths:
+      - "task-manager-api/**"
+      - ".github/workflows/task-manager-api.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Task Manager API
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: task-manager-api
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: task-manager-api/go.mod
+          cache: false
+
+      - name: Check Go formatting
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Run static analysis
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test -shuffle=on -count=5 ./...
+
+      - name: Build application
+        run: go build ./...
