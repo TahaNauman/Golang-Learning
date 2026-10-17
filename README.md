@@ -1,6 +1,6 @@
 # Go Learning — Mini Projects
 
-A collection of hands-on projects built while learning **Go (Golang)**, progressing from fundamental programming concepts to practical CLI tools and, eventually, backend development.
+A collection of hands-on projects built while learning **Go (Golang)**, progressing from fundamental programming concepts to practical CLI tools and REST APIs.
 
 The goal of this repository is to learn by building, understand Go's standard library, and develop good coding practices through progressively more challenging projects.
 
@@ -13,6 +13,7 @@ The goal of this repository is to learn by building, understand Go's standard li
 | 3 | [Expense Tracker](./expense-tracker/) | A command-line application for recording and managing expenses. | Structs, slices, maps, numeric input, aggregation |
 | 4 | [Student Grade Manager](./grades-manager/) | A program for managing student grades and calculating statistics. | Functions, slices, averages, minimum and maximum values, multiple return values |
 | 5 | [Log Analyzer](./log-analyzer/) | A CLI tool that parses log files, counts log levels, extracts error messages, and tracks malformed entries. | File I/O, structs, error handling, string parsing, maps, timestamps, unit testing |
+| 6 | [Task Manager REST API](./task-manager-api/) | A REST API for creating, reading, updating, and deleting tasks, with in-memory storage and concurrency protection. | HTTP handlers, REST endpoints, JSON, CRUD, input validation, `sync.Mutex`, unit testing |
 
 ## Getting Started
 
@@ -43,7 +44,14 @@ cd log-analyzer
 go run . server.log
 ```
 
-To run the Log Analyzer's tests:
+For the Task Manager REST API, start the server and open `http://localhost:8080`:
+
+```bash
+cd task-manager-api
+go run .
+```
+
+To run a project's tests:
 
 ```bash
 go test -v
@@ -56,8 +64,7 @@ Check each project's README for its specific instructions and requirements.
 This repository is an ongoing learning journey. Future projects will explore topics such as:
 
 - Concurrent programming with goroutines and channels
-- HTTP servers and REST APIs
-- JSON handling and database integration
+- Database integration and persistent storage
 - Automated testing and software quality
 - Docker, CI/CD, and cloud deployment
 

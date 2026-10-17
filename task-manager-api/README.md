@@ -1,16 +1,17 @@
 # Task Manager REST API
 
-A simple REST API built with Go's standard library to manage tasks. This project explores HTTP handlers, JSON, CRUD operations, input validation, concurrency protection, and API testing.
+A simple REST API built with Go's standard library for managing tasks.
+
+Task data is stored in memory and is lost when the server restarts.
 
 ## Features
 
-- Create, retrieve, update, and delete tasks
-- JSON request and response handling
-- Input validation for task titles and request payloads
-- Appropriate HTTP status codes
-- Mutex-based protection for shared task data
-- Unit tests using Go's `net/http/httptest` package
-- No third-party dependencies
+- Create, retrieve, update, and delete tasks.
+- Validate task titles and request payloads.
+- Return appropriate HTTP status codes.
+- Protect shared task data with `sync.Mutex`.
+- Unit tests using Go's `net/http/httptest` package.
+- No third-party dependencies.
 
 ## Tech Stack
 
@@ -20,19 +21,17 @@ A simple REST API built with Go's standard library to manage tasks. This project
 - **Testing:** `testing`, `net/http/httptest`
 - **Concurrency:** `sync.Mutex`
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+- Go 1.22 or later installed on your system.
 
-- Go installed on your machine
-
-### Run the API
+## How to Run
 
 Clone the repository and enter the project directory:
 
 ```bash
 git clone https://github.com/TahaNauman/Golang-Learning.git
-cd task-manager-api
+cd Golang-Learning/task-manager-api
 ```
 
 Start the server:
@@ -41,39 +40,21 @@ Start the server:
 go run .
 ```
 
-The API runs at:
-
-`http://localhost:8080`
+The API runs at `http://localhost:8080` and starts with two sample tasks.
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/` | Check API status |
-| GET | `/tasks` | Retrieve all tasks |
-| POST | `/tasks` | Create a task |
-| PUT | `/tasks/{id}` | Update a task |
-| DELETE | `/tasks/{id}` | Delete a task |
+| Method | Endpoint | Description | Success |
+|---|---|---|---|
+| GET | `/` | Check API status | `200 OK` |
+| GET | `/tasks` | Retrieve all tasks | `200 OK` |
+| POST | `/tasks` | Create a task | `201 Created` |
+| PUT | `/tasks/{id}` | Update a task | `200 OK` |
+| DELETE | `/tasks/{id}` | Delete a task | `204 No Content` |
 
-### 1. Health Check
+### Create a Task
 
-**Request:** `GET /`
-
-Returns a welcome message and API status.
-
-### 2. Get All Tasks
-
-**Request:** `GET /tasks`
-
-Returns the list of tasks as JSON.
-
-### 3. Create a Task
-
-**Request:** `POST /tasks`
-
-Content-Type: `application/json`
-
-Example request body:
+`POST /tasks` with Content-Type `application/json`:
 
 ```json
 {
@@ -81,15 +62,11 @@ Example request body:
 }
 ```
 
-A successful request returns `201 Created` and the newly created task. The server assigns the ID and initializes `completed` to `false`.
+The server assigns the ID and initializes `completed` to `false`.
 
-### 4. Update a Task
+### Update a Task
 
-**Request:** `PUT /tasks/1`
-
-Content-Type: `application/json`
-
-Example request body:
+`PUT /tasks/1` with Content-Type `application/json`:
 
 ```json
 {
@@ -98,47 +75,35 @@ Example request body:
 }
 ```
 
-A successful request returns the updated task.
-
-### 5. Delete a Task
-
-**Request:** `DELETE /tasks/1`
-
-A successful deletion returns `204 No Content`.
-
 ## Error Handling
 
-The API handles common errors, including:
+- `400 Bad Request` — malformed JSON, an empty task title, or a non-numeric task ID.
+- `404 Not Found` — the task ID does not exist.
+- `405 Method Not Allowed` — unsupported HTTP method on `/` or `/tasks`.
 
-- `400 Bad Request` — malformed JSON, invalid task ID, or an empty task title
-- `404 Not Found` — task ID does not exist
-- `405 Method Not Allowed` — unsupported HTTP method for the root or task collection endpoint
+## Concurrency
+
+The task list is a shared in-memory slice. A `sync.Mutex` guards every read and write, so concurrent requests cannot read or modify partially updated data.
 
 ## Running Tests
-
-Run the test suite:
 
 ```bash
 go test -v
 ```
 
-Run the tests repeatedly in shuffled order:
-
-```bash
-go test -shuffle=on -count=5
-```
+The tests cover all five endpoints, including validation failures, missing tasks, and unsupported methods.
 
 ## Current Limitations
 
 - Tasks are stored in memory and reset when the server restarts.
-- There is no database or persistent storage.
-- Authentication and authorization are not implemented.
-- The API has not yet been packaged for production deployment.
+- No database or persistent storage.
+- No authentication or authorization.
+- Not packaged for production deployment.
 
-## What I Learned
+## Key Learning Outcomes
 
-- Building REST endpoints with Go's standard library
-- Handling JSON requests and responses
-- Validating user input and returning HTTP status codes
-- Writing HTTP handler tests with `httptest`
-- Protecting shared state with a mutex
+- Building REST endpoints with Go's standard library.
+- Handling JSON requests and responses.
+- Validating input and returning HTTP status codes.
+- Writing HTTP handler tests with `httptest`.
+- Protecting shared state with a mutex.
