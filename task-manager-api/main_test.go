@@ -9,6 +9,10 @@ import (
 )
 
 func resetTasks() {
+
+	tasksMutex.Lock()
+	defer tasksMutex.Unlock()
+
 	tasks = []Task{
 		{ID: 1, Title: "Task 1", Completed: false},
 		{ID: 2, Title: "Task 2", Completed: true},
@@ -168,13 +172,61 @@ func TestDeleteTask(t *testing.T) {
 	}
 }
 
-func TestGetNonexistentTask(t *testing.T) {
+func TestUpdateNonexistentTask(t *testing.T) {
 	resetTasks()
 	req := httptest.NewRequest(http.MethodPut, "/tasks/999",
 		strings.NewReader(`{"title":"Missing task","completed":false}`))
 	req.Header.Set("Content-Type", "application/json")
 
 	rec := httptest.NewRecorder()
+	setupRoutes().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected status %d, got %d",
+			http.StatusNotFound, rec.Code)
+	}
+}
+
+func TestUpdateTaskWithInvalidID(t *testing.T) {
+	resetTasks()
+
+	req := httptest.NewRequest(
+		http.MethodPut,
+		"/tasks/abc",
+		strings.NewReader(`{"title":"Updated task","completed":true}`),
+	)
+	rec := httptest.NewRecorder()
+
+	setupRoutes().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d",
+			http.StatusBadRequest, rec.Code)
+	}
+}
+
+func TestTasksMethodNotAllowed(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPatch, "/tasks", nil)
+	rec := httptest.NewRecorder()
+
+	setupRoutes().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Errorf("expected status %d, got %d",
+			http.StatusMethodNotAllowed, rec.Code)
+	}
+}
+
+func TestDeleteNonexistentTask(t *testing.T) {
+	resetTasks()
+
+	req := httptest.NewRequest(
+		http.MethodDelete,
+		"/tasks/999",
+		nil,
+	)
+	rec := httptest.NewRecorder()
+
 	setupRoutes().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusNotFound {
