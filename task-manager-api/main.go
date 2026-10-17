@@ -46,10 +46,12 @@ func setupRoutes() *http.ServeMux {
 
 	mux.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			w.Header().Set("Content-Type", "application/json")
 			tasksMutex.Lock()
-			defer tasksMutex.Unlock()
-			json.NewEncoder(w).Encode(tasks)
+			tasksCopy := append([]Task(nil), tasks...)
+			tasksMutex.Unlock()
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(tasksCopy)
 		} else if r.Method == http.MethodPost {
 			var newTask Task
 			if err := json.NewDecoder(r.Body).Decode(&newTask); err != nil {
@@ -94,19 +96,29 @@ func setupRoutes() *http.ServeMux {
 		}
 
 		tasksMutex.Lock()
-		defer tasksMutex.Unlock()
+
+		var result Task
+		found := false
+
 		for i, task := range tasks {
 			if task.ID == id {
-				tasks[i].Completed = updatedTask.Completed
 				tasks[i].Title = updatedTask.Title
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(tasks[i])
-				return
+				tasks[i].Completed = updatedTask.Completed
+				result = tasks[i]
+				found = true
+				break
 			}
 		}
 
-		http.Error(w, "Task not found", http.StatusNotFound)
+		tasksMutex.Unlock()
+
+		if !found {
+			http.Error(w, "Task not found", http.StatusNotFound)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
 	})
 
 	mux.HandleFunc("DELETE /tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
