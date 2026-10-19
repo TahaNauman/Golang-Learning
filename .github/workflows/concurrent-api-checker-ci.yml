@@ -1,0 +1,48 @@
+
+name: Concurrent API Checker CI
+
+on:
+  push:
+    paths:
+      - "concurrent-api-checker/**"
+      - ".github/workflows/concurrent-api-checker.yml"
+  pull_request:
+    paths:
+      - "concurrent-api-checker/**"
+      - ".github/workflows/concurrent-api-checker.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Concurrent API Checker
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: concurrent-api-checker
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: concurrent-api-checker/go.mod
+          cache: false
+
+      - name: Check Go formatting
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Run static analysis
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test -shuffle=on -count=5 ./...
+
+      - name: Build application
+        run: go build ./...
