@@ -64,7 +64,7 @@ func main() {
 			results <- result
 		}(u)
 	}
-	
+
 	go func() {
 		wg.Wait()
 		close(results)
