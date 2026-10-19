@@ -14,6 +14,7 @@ The goal of this repository is to learn by building, understand Go's standard li
 | 4 | [Student Grade Manager](./grades-manager/) | A program for managing student grades and calculating statistics. | Functions, slices, averages, minimum and maximum values, multiple return values |
 | 5 | [Log Analyzer](./log-analyzer/) | A CLI tool that parses log files, counts log levels, extracts error messages, and tracks malformed entries. | File I/O, structs, error handling, string parsing, maps, timestamps, unit testing |
 | 6 | [Task Manager REST API](./task-manager-api/) | A REST API for creating, reading, updating, and deleting tasks, with in-memory storage and concurrency protection. | HTTP handlers, REST endpoints, JSON, CRUD, input validation, `sync.Mutex`, unit testing |
+| 7 | [Concurrent API Checker](./concurrent-api-checker/) | A CLI tool that checks multiple URLs concurrently and reports each one's status code and response time. | Goroutines, `sync.WaitGroup`, buffered channels, `net/http`, timeouts, `httptest` |
 
 ## Getting Started
 
@@ -63,7 +64,6 @@ Check each project's README for its specific instructions and requirements.
 
 This repository is an ongoing learning journey. Future projects will explore topics such as:
 
-- Concurrent programming with goroutines and channels
 - Database integration and persistent storage
 - Automated testing and software quality
 - Docker, CI/CD, and cloud deployment
